@@ -12,7 +12,8 @@ class Link
 	State * head;
 public:
 	Link(State * tail, State * head);
-	Link();
+	State * getTail();
+	State * getHead();
 	static size_t hash(const Link&);
 	static bool equalTo(const Link&, const Link&);
 };

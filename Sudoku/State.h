@@ -6,9 +6,14 @@ class State
 	bool * dominio;
 	bool initial;
 	int assignedNumber;
+	int row, col;
 public:
-	State(int);
+	State(int, int, int);
 	~State();
-	bool numberUsed(int);
+	bool numberAvailable(int);
 	bool isInitial();
+	int getRow();
+	int getCol();
+	void removeFromDomain(int);
+	int assignedValue();
 };

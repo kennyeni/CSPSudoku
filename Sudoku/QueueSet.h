@@ -42,8 +42,10 @@ class QueueSet
 {
 	std::queue<Link> _queue;
 	std::unordered_set<Link, Hasher, Equal> _set;
+	int _size;
 public:
 	void push(Link);
 	Link pop();
 	bool contains(Link);
+	int size();
 };

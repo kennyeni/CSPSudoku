@@ -3,8 +3,10 @@
 #include <stdlib.h>
 #include "State.h"
 
-State::State(int initialValue)
+State::State(int initialValue, int row, int col)
 {
+	this->row = row;
+	this->col = col;
 	if (initialValue > 0)
 	{
 		initial = true;
@@ -22,7 +24,7 @@ State::~State()
 	free(dominio);
 }
 
-bool State::numberUsed(int i)
+bool State::numberAvailable(int i)
 {
 	return !dominio[i];
 }
@@ -32,20 +34,13 @@ bool State::isInitial()
 	return initial;;
 }
 
+int State::getRow()
+{
+	return row;
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+int State::getCol()
+{
+	return col;
+}
 

@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <algorithm>
 
 #ifndef STATE_H
 #define STATE_H
@@ -34,11 +35,12 @@
 
 State * states[9][9]; // Pointer array that points to all States
 QueueSet queue;
+int whiteSpaces = 0;
 
 
 void createLinks(State * state, int row, int col)
 {
-	// Create row links
+	// Create row and col links
 	for (int i = 0; i < 9; i++)
 	{
 		if (col != i) // Do not make a pointer to myself
@@ -48,10 +50,28 @@ void createLinks(State * state, int row, int col)
 		}
 		if (row != i) // Do not make a pointer to myself
 		{
-			Link tmp = Link(states[row][col], states[i][col]);
+			Link tmp = Link(states[row][col], states[i][col]); // Tail: This, Head: Other
 			queue.push(tmp);
 		}
 	}
+	int rowB, colB;
+	rowB = row / 3; // Implicit floor
+	colB = col / 3; // Implicit floor
+	rowB *= 3;
+	colB *= 3;
+
+	for (int i = rowB; i < (rowB + 3); i++)
+	{
+		for (int j = colB; j < (colB + 3); j++)
+		{
+			if (i != row && j != col)
+			{
+				Link tmp = Link(states[row][col], states[i][j]); // Tail: This, Head: Other
+				queue.push(tmp);
+			}
+		}
+	}
+
 }
 
 void initializeStates(const int sudoku[9][9])
@@ -60,22 +80,102 @@ void initializeStates(const int sudoku[9][9])
 		for (int j = 0; j < 9; j++)
 		{
 			int tmp = sudoku[i][j];
-			// Nuevo estado, se almacena su apuntador
-			State * tmpState = states[i][j] = new State(tmp);
-			
-			// Si es inicial no es necesario poner dependencias, se asume que estan bien
-			if (! tmpState->isInitial()) 
+			// We save the new State pointer
+			states[i][j] = new State(tmp, i, j);
+		}
+	}
+
+	// We cannot merge this for loop with the upper one, because the states are initilized on NULL
+	for (int i = 0; i < 9; i++){
+		for (int j = 0; j < 9; j++)
+		{
+			State * tmpState = states[i][j];
+			// If the state is initial we don't check dependencies, solvable sudokus is assumed
+			if (!tmpState->isInitial())
 			{
 				createLinks(tmpState, i, j);
+				whiteSpaces++;
 			}
+		}
+	}
+
+}
+
+bool removeInconsistentValues(Link link)
+{
+	bool removed = false;
+	State * tail = link.getTail();
+	State * head = link.getHead();
+
+	for (int i = 0; i < 9; i++)
+	{
+		if (tail->numberAvailable(i))
+		{
+			if (head->isInitial())
+			{
+				tail->removeFromDomain(head->assignedValue());
+			}
+		}
+	}
+	return removed;
+}
+
+// Like upper implementation but swapped
+void addNeighborsToQueueOf(State * state)
+{
+	int row = state->getRow();
+	int col = state->getCol();
+	// Create row and col links
+	for (int i = 0; i < 9; i++)
+	{
+		if (col != i) // Do not make a pointer to myself
+		{
+			if (states[row][i]->isInitial()) continue;
+			Link tmp = Link(states[row][i], states[row][col]); // Tail: This, Head: Other
+			queue.push(tmp);
+		}
+		if (row != i) // Do not make a pointer to myself
+		{
+			if (states[i][col]->isInitial()) continue;
+			Link tmp = Link(states[i][col], states[row][col]); // Tail: This, Head: Other
+			queue.push(tmp);
+		}
+	}
+	int rowB, colB;
+	rowB = row / 3; // Implicit floor
+	colB = col / 3; // Implicit floor
+	rowB *= 3;
+	colB *= 3;
+
+	for (int i = rowB; i < (rowB + 3); i++)
+	{
+		for (int j = colB; j < (colB + 3); j++)
+		{
+			if (i != row && j != col)
+			{
+				if (states[i][j]->isInitial()) continue;
+				Link tmp = Link(states[i][j], states[row][col]); // Tail: This, Head: Other
+				queue.push(tmp);
+			}
+		}
+	}
+}
+
+void arcConsistency()
+{
+	while (queue.size() > 0)
+	{
+		Link link = queue.pop();
+		if (removeInconsistentValues(link))
+		{
+			addNeighborsToQueueOf(link.getTail());
 		}
 	}
 }
 
 void solveCSP(const int sudoku[][9]){
 	initializeStates(sudoku);
-
-	
+	arcConsistency();
 }
 
 int main(){
@@ -95,5 +195,6 @@ int main(){
 		}
 	}
 	solveCSP(sudoku);
+	printf("Espacios vacios: %d Tamano:%d", whiteSpaces * 20, queue.size());
 	return 0;
 }
