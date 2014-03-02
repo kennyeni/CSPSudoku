@@ -1,45 +1,49 @@
-// Author: Andres Duran <contact@ekenny.org>
-#include <unordered_set>
-#include <queue>
 /*
-* Esta funcion define una fila con elementos unicos
-* en el contexto de esta funcion, los elementos son iguales
-* si su direccion de memoria es la misma.
+* Copyright (c) 2014 Andres Duran <contact@ekenny.org>
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-class Hasher
-{
-public:
-	size_t operator() (string const& key) const
-	{
-		cout << "Hashing called";
-		size_t hash = 0;
-		for (size_t i = 0; i<key.size(); i++)
-		{
-			hash += (71 * hash + key[i]) % 5;
-		}
-		return hash;
-	}
-};
-class EqualFn
-{
-public:
-	bool operator() (string const& t1, string const& t2) const
-	{
-		cout << "Equal called";
-		return !(t1.compare(t2));
-	}
+/*
+* Helper class that defines an unordered queue with
+* unique elements
+*/
+
+#include <unordered_set>
+#include <queue>
+#ifndef LINK_H
+#define LINK_H
+#include "Link.h"
+#endif
+
+// Helper structs to make Link comparable and hashable
+// Requires class to implement static hash and equalTo methods 
+struct Hasher {
+	size_t operator() (const Link& a) const { return Link::hash(a); }
 };
 
+struct Equal {
+	bool operator() (const Link& a, const Link& b) const { return Link::equalTo(a, b); }
+};
 
-template<typename T>
+// Main header
 class QueueSet
 {
-	std::queue<T> _queue;
-	std::unordered_set<T, T, Hasher, EqualFn> _set;
+	std::queue<Link> _queue;
+	std::unordered_set<Link, Hasher, Equal> _set;
 public:
-	QueueSet();
-	void push(T);
-	T pop();
-	bool contains(T);
+	void push(Link);
+	Link pop();
+	bool contains(Link);
 };

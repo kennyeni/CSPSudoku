@@ -12,8 +12,7 @@ class Link
 	State * head;
 public:
 	Link(State * tail, State * head);
-	bool operator() (const Link& x, const Link& y) const 
-	{ 
-		return x.head == y.head && x.tail == y.head; 
-	}
+	Link();
+	static size_t hash(const Link&);
+	static bool equalTo(const Link&, const Link&);
 };

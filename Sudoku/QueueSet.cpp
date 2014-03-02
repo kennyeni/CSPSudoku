@@ -1,8 +1,11 @@
 // Author: Andres Duran <contact@ekenny.org>
+#ifndef LINK_H
+#define LINK_H
+#include "Link.h"
+#endif
 #include "QueueSet.h"
 
-template<typename T>
-void QueueSet<T>::push(T element)
+void QueueSet::push(Link element)
 {
 	if (! contains(element))
 	{
@@ -11,16 +14,15 @@ void QueueSet<T>::push(T element)
 	}
 }
 
-template<typename T>
-bool QueueSet<T>::contains(T element)
+bool QueueSet::contains(Link element)
 {
-	return !(_set.find() == _set.end());
+	return !(_set.find(element) == _set.end());
 }
 
-template<typename T>
-T QueueSet<T>::pop()
+Link QueueSet::pop()
 {
-	State tmp =  _queue.pop();
+	Link tmp =  _queue.front();
+	_queue.pop();
 	_set.erase(tmp);
 	return tmp;
 }

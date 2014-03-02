@@ -25,19 +25,33 @@
 #include "State.h"
 #endif
 
+#ifndef LINK_H
+#define LINK_H
 #include "Link.h"
+#endif
+
 #include "QueueSet.h"
 
-State * states[9][9]; // Arreglo de apuntadores a los estados
-QueueSet<Link> queue;
+State * states[9][9]; // Pointer array that points to all States
+QueueSet queue;
 
 
-void createLinks(State * state, int i, int j)
+void createLinks(State * state, int row, int col)
 {
-	Link tmp = Link(states[i][i], states[i][i]);
-	queue.push(tmp);
-	bool ex = queue.contains(tmp);
-	ex = ex;
+	// Create row links
+	for (int i = 0; i < 9; i++)
+	{
+		if (col != i) // Do not make a pointer to myself
+		{
+			Link tmp = Link(states[row][col], states[row][i]); // Tail: This, Head: Other
+			queue.push(tmp);
+		}
+		if (row != i) // Do not make a pointer to myself
+		{
+			Link tmp = Link(states[row][col], states[i][col]);
+			queue.push(tmp);
+		}
+	}
 }
 
 void initializeStates(const int sudoku[9][9])
