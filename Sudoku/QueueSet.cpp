@@ -12,8 +12,6 @@
 
 #include "QueueSet.h"
 
-int count = 0;
-
 void QueueSet::push(Link element)
 {
 	if (! contains(element))
@@ -21,10 +19,6 @@ void QueueSet::push(Link element)
 		_set.insert(element);
 		_queue.push(element);
 		_size++;
-	}
-	else
-	{
-		printf_s("Duplicate detected %d\n", ++count);
 	}
 
 	assert(_set.size() == _queue.size());

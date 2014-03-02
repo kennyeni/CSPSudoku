@@ -3,17 +3,19 @@
 // State head
 class State
 {
-	bool * dominio;
-	bool initial;
-	int assignedNumber;
-	int row, col;
+	bool * _domain;
+	int _domainSize;
+	bool _final;
+	int _assignedNumber;
+	int _row, _col;
 public:
 	State(int, int, int);
 	~State();
 	bool numberAvailable(int);
-	bool isInitial();
+	bool isFinal();
 	int getRow();
 	int getCol();
 	void removeFromDomain(int);
 	int assignedValue();
+	void consolidate();
 };
