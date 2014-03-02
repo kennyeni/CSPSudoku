@@ -1,3 +1,4 @@
+// Custom class that represent a Queue with unique elements
 /*
 * Copyright (c) 2014 Andres Duran <contact@ekenny.org>
 *

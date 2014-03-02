@@ -1,3 +1,4 @@
+// Algorithm main point of entry
 /*
 * Copyright (c) 2014 Andres Duran <contact@ekenny.org>
 *
@@ -15,11 +16,11 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Main algorithm point of entry
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <algorithm>
+#include <vector>
 
 #ifndef STATE_H
 #define STATE_H
@@ -31,10 +32,16 @@
 #include "Link.h"
 #endif
 
+#ifndef ASSERT_H
+#define SSERT_H
+#include <assert.h>
+#endif
+
 #include "QueueSet.h"
 
+typedef std::priority_queue<State, std::vector<State>, StateCompare> priorityQueue;
+
 State * states[9][9]; // Pointer array that points to all States
-int whiteSpaces = 0;
 
 void createLinks(QueueSet * queue, State * state, int row, int col)
 {
@@ -86,7 +93,6 @@ void initializeStates(const int sudoku[9][9])
 
 QueueSet * initialLinks(){
 	QueueSet * queue = new QueueSet;
-	// We cannot merge this for loop with the upper one, because the states are initilized on NULL
 	for (int i = 0; i < 9; i++){
 		for (int j = 0; j < 9; j++)
 		{
@@ -95,24 +101,18 @@ QueueSet * initialLinks(){
 			if (!tmpState->isFinal())
 			{
 				createLinks(queue, tmpState, i, j);
-				whiteSpaces++;
 			}
 		}
 	}
 	return queue;
 }
 
+// Removes the invalid values of the domain of the tail, true is it has removed something at all
 bool removeInconsistentValues(Link link)
 {
 	bool removed = false;
 	State * tail = link.getTail();
 	State * head = link.getHead();
-
-	/*if (head->isFinal())
-	{
-		tail->removeFromDomain(head->assignedValue());
-		return true;
-	}*/
 
 	for (int i = 1; i <= 9; i++)
 	{
@@ -172,19 +172,27 @@ void addNeighborsToQueueOf(QueueSet * queue, State * state)
 	}
 }
 
-void arcConsistency(QueueSet * queue)
+// Returns true if this path is still good, if this path should be forgotten returns false
+bool arcConsistency(QueueSet * queue)
 {
 	while (queue->size() > 0)
 	{
 		Link link = queue->pop();
 		if (removeInconsistentValues(link))
 		{
+			if (link.getTail()->isDirty())
+			{
+				printf_s("Wrong solution found");
+				return false;
+			}
 			addNeighborsToQueueOf(queue, link.getTail());
 		}
 	}
 	// The queue is empty so we can free it
 	free(queue);
+	return true;
 }
+
 
 void printIfReady(){
 	printf("\n");
@@ -200,25 +208,69 @@ void printIfReady(){
 
 }
 
+// Finalize values
 void consolidateStates()
 {
 	for (int i = 0; i < 9; i++)
 	{
 		for (int j = 0; j < 9; j++)
 		{
-			//states[i][j]->consolidate();
+			if (states[i][j]->assignedValue() > 0)
+			{
+				states[i][j]->consolidate();
+			}
 		}
 	}
 }
 
-void solveCSP(const int sudoku[][9]){
+void preprocessing(const int sudoku[][9])
+{
 	// Creates the states
 	initializeStates(sudoku);
 	// Creates all Possible Initial Links(Tail: unassigned H : unassigned / assigned)
 	QueueSet * queue = initialLinks();
+	// Initial consistency
+	if (!arcConsistency(queue))
+	{
+		printf("Unsolvable sudoku!");
+	}
 	// Since the previous preprocessing is warranted to be true (if a solvable sudoku was given), we consolidate them
 	consolidateStates();
-	arcConsistency(queue); // Initial consistency
+}
+
+bool recursiveBacktrack(priorityQueue queue)
+{
+	if (queue.empty())
+		return true;
+	return false;
+}
+
+bool bactrackSearch()
+{
+	// Add blank spaces to the list of vars that need to be assigned
+	// This queue gives priority to smaller domain states, so we try to assign them first
+	priorityQueue queue;
+	for (int i = 0; i < 9; i++)
+	{
+		for (int j = 0; j < 9; j++)
+		{
+			if (!states[i][j]->isFinal())
+			{
+				assert(states[i][j]->assignedValue() == 0);
+				assert(!states[i][j]->isDirty());
+				queue.push(*states[i][j]);
+			}
+		}
+	}
+	State r = queue.top();
+	return recursiveBacktrack(queue);
+}
+
+void solveCSP(const int sudoku[][9]){
+	// First filtering
+	preprocessing(sudoku);
+	bactrackSearch();
+
 	printIfReady();
 }
 
