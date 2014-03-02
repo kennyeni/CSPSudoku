@@ -5,7 +5,7 @@ Sudo solver using CSP implementation (constraint propagation used)
 
 License
 =======
-Copyright (c) 2014 Andres Duran <contact@ekenny.org>
+Copyright (c) 2014 Andres Duran <contact [at ] ekenny.org>
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
