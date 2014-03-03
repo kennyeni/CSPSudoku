@@ -20,34 +20,34 @@
 
 Link::Link(State * t, State * h)
 {
-	this->tail = t;
-	this->head = h;
+	this->_tail = t;
+	this->_head = h;
 }
 
 State * Link::getTail(){
-	return tail;
+	return _tail;
 }
 
 State * Link::getHead(){
-	return head;
+	return _head;
 }
 
 // The hash is just a concatenated representation of the head and tail Rows and Cols
 size_t Link::hash(const Link& a)
 {
 	int hash = 0;
-	hash += (*a.head).getRow();
+	hash += (*a._head).getRow();
 	hash *= 10;
-	hash += (*a.head).getCol();
+	hash += (*a._head).getCol();
 	hash *= 10;
-	hash += (*a.tail).getRow();
+	hash += (*a._tail).getRow();
 	hash *= 10;
-	hash += (*a.tail).getCol();
+	hash += (*a._tail).getCol();
 	return hash;
 }
 
 // The equality factor is just if the head and tail point to the same directions
 bool Link::equalTo(const Link& a, const Link& b)
 {
-	return a.head == b.head && a.tail == b.tail;
+	return a._head == b._head && a._tail == b._tail;
 }

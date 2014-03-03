@@ -23,8 +23,8 @@
 
 class Link
 {
-	State * tail;
-	State * head;
+	State * _tail;
+	State * _head;
 public:
 	Link(State * tail, State * head);
 	State * getTail();

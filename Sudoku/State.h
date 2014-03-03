@@ -22,24 +22,31 @@ class State
 	int _domainSize;
 	bool _final;
 	bool _dirty;
+	bool _forced;
 	int _assignedNumber;
 	int _row, _col;
 public:
+	static void copyStateArray(State * a[][9], State * b[][9]);
+	static bool compareTo(State& a, State& b);
+
 	State(int, int, int);
-	~State();
+	State(const State&);
+
 	bool numberAvailable(int);
-	bool isFinal();
 	int getRow();
 	int getCol();
 	void removeFromDomain(int);
 	int assignedValue();
 	void consolidate();
 	bool isDirty();
-	static bool compareTo(const State& a, const State& b);
+	bool isForced();
+	bool isFinal();
+	void forceAssignment(int);
 };
 
+// Helper struct to compare two functions
 struct StateCompare {
-	bool operator() (const State& a, const State& b) const { 
+	bool operator() (State& a, State& b) const {
 		return State::compareTo(a, b);
 	}
 };

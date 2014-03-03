@@ -20,7 +20,6 @@
 #include "Link.h"
 #endif
 
-
 #ifndef ASSERT_H
 #define SSERT_H
 #include <assert.h>

@@ -28,6 +28,7 @@ State::State(int initialValue, int row, int col)
 	this->_row = row;
 	this->_col = col;
 	this->_dirty = false;
+	this->_forced = false;
 	if (initialValue > 0)
 	{
 		_final = true;
@@ -42,9 +43,24 @@ State::State(int initialValue, int row, int col)
 	}
 }
 
-State::~State()
-{
-	free(_domain);
+State::State(const State& other){
+	this->_assignedNumber = other._assignedNumber;
+	this->_col = other._col;
+	this->_row = other._row;
+	this->_domainSize = other._domainSize;
+	this->_final = other._final;
+	this->_dirty = other._dirty;
+	this->_forced = other._forced;
+
+	if (other._domain){
+		this->_domain = (bool *)calloc(11, sizeof(bool));
+		for (int i = 0; i < 11; i++)
+		{
+			this->_domain[i] = other._domain[i];
+		}
+	}
+	
+	
 }
 
 // Is the given number still on the domain?
@@ -87,6 +103,7 @@ void State::removeFromDomain(int v)
 		{
 			if (!_domain[i]){
 				_assignedNumber = i;
+				_forced = true;
 				return;
 			}
 		}
@@ -117,7 +134,42 @@ void State::consolidate(){
 }
 
 // Gives priority to smaller domain states
-bool State::compareTo(const State& a, const State& b)
+bool State::compareTo(State& a, State& b)
 {
 	return a._domainSize > b._domainSize;
+}
+
+// Simulate this state to be initial so the number is forced
+void State::forceAssignment(int i){
+	this->_forced = true;
+	this->_assignedNumber = i;
+	for (int i = 1; i <= 9; i++){
+		if (_assignedNumber != i)
+			this->removeFromDomain(i);
+	}
+}
+
+bool State::isForced(){
+	return _forced;
+}
+
+// Makes a deep copy of the array, if the state is final, we recycle it
+void State::copyStateArray(State * a[][9], State * b[][9])
+{
+	for (int i = 0; i < 9; i++)
+	{
+		for (int j = 0; j < 9; j++)
+		{
+			State * tmp;
+			if (a[i][j]->isFinal())
+			{
+				tmp = a[i][j];
+			}
+			else
+			{
+				tmp = new State(*a[i][j]); // A copy is made
+			}
+			b[i][j] = tmp;
+		}
+	}
 }
